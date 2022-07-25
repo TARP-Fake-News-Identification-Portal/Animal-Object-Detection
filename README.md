@@ -1,1 +1,1 @@
-# Animal-Object-Detection
+# Object-Detection-on-Animals
