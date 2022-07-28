@@ -10,6 +10,11 @@ __pycache__/
 *.jpeg
 *.txt
 *.png
+*.proto
+*.tar.*
+Tensorflow
+bin
+include
 
 # Distribution / packaging
 .Python
