@@ -9,6 +9,7 @@ from object_detection.builders import model_builder
 from object_detection.utils import config_util
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 CUSTOM_MODEL_NAME = "my_ssd_mobnet"
 PRETRAINED_MODEL_NAME = "ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8"
@@ -61,7 +62,7 @@ detection_model = model_builder.build(model_config=configs["model"], is_training
 
 # Restore checkpoint
 ckpt = tf.compat.v2.train.Checkpoint(model=detection_model)
-ckpt.restore(os.path.join(paths["CHECKPOINT_PATH"], "ckpt-14")).expect_partial()
+ckpt.restore(os.path.join(paths["CHECKPOINT_PATH"], "ckpt-4")).expect_partial()
 
 
 @tf.function
@@ -74,10 +75,6 @@ def detect_fn(image):
 
 
 category_index = label_map_util.create_category_index_from_labelmap(files["LABELMAP"])
-
-# name = '01219610002021-06'
-
-# IMAGE_PATH = os.path.join(paths['TEST_PATH'], name+'.bmp')
 
 
 def get_coordinates(x, y, bounding_boxes, padding=0):
@@ -160,45 +157,36 @@ def save_output_to_folder(IMAGE_PATH, path_to_save, results, threshold=0.2, valu
             continue
 
         cv2.imwrite(
-            os.path.join(path_to_save, img_name + "_img_" + str(cnt) + ".bmp"),
+            os.path.join(path_to_save, img_name + "_img_" + str(cnt) + ".jpg"),
             cropped_image,
         )
         path_to_save = s
 
 
-# save_output_to_folder(IMAGE_PATH, './data/obj_cropped',output_detection_boxes_with_score(IMAGE_PATH, print_detections=True))
-
-# PATH_TO_IMAGES = './data/cropped_test/'
-# files = [f for f in os.listdir(PATH_TO_IMAGES) if f.endswith('.bmp')]
-# for file in files:
-#     file = PATH_TO_IMAGES + file
-#     save_output_to_folder(file,'./data/cropped_digits_test',output_detection_boxes_with_score(file),threshold=0.2)
-
-#  cv2.imshow('image',cv2.cvtColor(image_np_with_detections, cv2.COLOR_BGR2RGB))
-# cv2.waitKey()
 if __name__ == "__main__":
-    IMAGE_PATH = (
-        "C:/Users/Ashwin/Projects/Object-Detection-on-Animals/data/test/Bear_1.jpg"
-    )
-    results = output_detection_boxes_with_score(
-        IMAGE_PATH,
-        num_boxes=2,
-    )
-    print(results)
-    label_id_offset = 1
-    image_np = cv2.imread(IMAGE_PATH)
-    image_np_with_detections = image_np.copy()
-    output_image = viz_utils.visualize_boxes_and_labels_on_image_array(
-        image_np_with_detections,
-        results["detection_boxes"],
-        results["detection_classes"] + label_id_offset,
-        results["detection_scores"],
-        category_index,
-        use_normalized_coordinates=False,
-        max_boxes_to_draw=8,
-        min_score_thresh=0.2,
-        agnostic_mode=False,
-    )
-    cv2.imshow("Output", output_image)
-    cv2.waitKey()
-# draw_predictions(IMAGE_PATH=IMAGE_PATH, result=results)
+    for idx, img in enumerate(os.listdir("./data/test")):
+        i = np.random.randint(0, len(os.listdir("./data/test")))
+        input_img = os.listdir("./data/test")[i]
+        IMAGE_PATH = f"C:/Users/Ashwin/Projects/Object-Detection-on-Animals/data/test/{input_img}"
+        results = output_detection_boxes_with_score(
+            IMAGE_PATH,
+            num_boxes=1,
+        )
+        label_id_offset = 1
+        image_np = cv2.imread(IMAGE_PATH)
+        image_np_with_detections = image_np.copy()
+        output_image = viz_utils.visualize_boxes_and_labels_on_image_array(
+            image_np_with_detections,
+            results["detection_boxes"],
+            results["detection_classes"] + label_id_offset,
+            results["detection_scores"],
+            category_index,
+            use_normalized_coordinates=False,
+            max_boxes_to_draw=8,
+            min_score_thresh=0.3,
+            agnostic_mode=False,
+        )
+        cv2.imwrite(
+            f"C:/Users/Ashwin/Projects/Object-Detection-on-Animals/output/predicted_{input_img}___{idx}.jpg",
+            output_image,
+        )
